@@ -1,9 +1,8 @@
 from sqlalchemy import Column, String, Enum, Date, Integer, UUID
-from sqlalchemy.ext.declarative import declarative_base
+from api.database import Base
 import uuid
 
 from api.enums import PolicyType, PolicyStatus
-Base= declarative_base()
 
 class PolicyDB(Base):
     __tablename__= 'policies'

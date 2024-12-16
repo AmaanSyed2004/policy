@@ -7,7 +7,7 @@ from api.enums import PolicyStatus
 from api.enums import PolicyType
 
 class PolicyInput(BaseModel):
-    PolicyName: str
+    PolicyHolderName: str
     PolicyType: PolicyType
     PolicyStartDate: date
     PolicyEndDate: date
@@ -15,7 +15,7 @@ class PolicyInput(BaseModel):
     Status: PolicyStatus
 
 class PolicyPutInput(BaseModel):
-    PolicyName: Optional[str] = None
+    PolicyHolderName: Optional[str] = None
     PolicyType: Optional[PolicyType] = None #type: ignore
     PolicyStartDate: Optional[date] = None
     PolicyEndDate: Optional[date] = None
@@ -24,7 +24,7 @@ class PolicyPutInput(BaseModel):
 
 class PolicyResponse(BaseModel):
     PolicyID: UUID
-    PolicyName: str
+    PolicyHolderName: str
     PolicyType: PolicyType
     PolicyStartDate: date
     PolicyEndDate: date
