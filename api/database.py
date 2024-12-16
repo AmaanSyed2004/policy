@@ -1,10 +1,21 @@
-import uuid
-from api.models import Policy, PolicyStatus, PolicyType
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-# keeping a list as a mock databse
-policies = [
-    Policy(PolicyID="001b767e-b947-11ef-9ece-342eb7925977", PolicyName="Life Insurance", PolicyType=PolicyType.Life, PolicyStartDate="2021-01-01", PolicyEndDate="2025-01-01", PremiumAmount=10000, Status=PolicyStatus.active),
-    Policy(PolicyID=uuid.uuid1(), PolicyName="Health Insurance", PolicyType=PolicyType.Health, PolicyStartDate="2021-01-01", PolicyEndDate="2025-01-01", PremiumAmount=20000, Status=PolicyStatus.active),
-    Policy(PolicyID=uuid.uuid1(), PolicyName="Car Insurance", PolicyType=PolicyType.Car, PolicyStartDate="2021-01-01", PolicyEndDate="2024-03-01", PremiumAmount=30000, Status=PolicyStatus.expired),
-    Policy(PolicyID=uuid.uuid1(), PolicyName="Home Insurance", PolicyType=PolicyType.Home, PolicyStartDate="2021-01-01", PolicyEndDate="2026-01-01", PremiumAmount=40000, Status=PolicyStatus.active),
-]
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base() #this is the base that is used further in models.py
+Base.metadata.create_all(bind=engine)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
