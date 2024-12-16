@@ -1,23 +1,18 @@
-from pydantic import BaseModel
-from enum import Enum
+from sqlalchemy import Column, String, Enum, Date, Integer, UUID
+from sqlalchemy.ext.declarative import declarative_base
 import uuid
-from datetime import date
 
-class PolicyType(str, Enum):
-    Life = "Life"
-    Health = "Health"
-    Car = "Car"
-    Home = "Home"
+from api.enums import PolicyType, PolicyStatus
+Base= declarative_base()
 
-class PolicyStatus(str, Enum):
-    active = "active"
-    expired = "expired"
+class PolicyDB(Base):
+    __tablename__= 'policies'
 
-class Policy(BaseModel):
-    PolicyID: uuid.UUID
-    PolicyName: str
-    PolicyType: PolicyType
-    PolicyStartDate: date
-    PolicyEndDate: date
-    PremiumAmount: int
-    Status: PolicyStatus
+    PolicyID= Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4) 
+    PolicyHolderName= Column(String, nullable=False)
+    PolicyType= Column(Enum(PolicyType), nullable=False)
+    PolicyStartDate= Column(Date, nullable=False)
+    PolicyEndDate= Column(Date, nullable=False)
+    PremiumAmount= Column(Integer, nullable=False)
+    Status= Column(Enum(PolicyStatus), nullable=False)
+    

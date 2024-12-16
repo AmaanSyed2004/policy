@@ -1,10 +1,10 @@
 from datetime import date
 from typing import Optional
 from pydantic import BaseModel
+from uuid import UUID
 
-from api.models import PolicyStatus
-from api.models import PolicyType
-from api.models import Policy
+from api.enums import PolicyStatus
+from api.enums import PolicyType
 
 class PolicyInput(BaseModel):
     PolicyName: str
@@ -16,11 +16,22 @@ class PolicyInput(BaseModel):
 
 class PolicyPutInput(BaseModel):
     PolicyName: Optional[str] = None
-    PolicyType: Optional[PolicyType] = None
+    PolicyType: Optional[PolicyType] = None #type: ignore
     PolicyStartDate: Optional[date] = None
     PolicyEndDate: Optional[date] = None
     PremiumAmount: Optional[int] = None
     Status: Optional[PolicyStatus] = None
 
+class PolicyResponse(BaseModel):
+    PolicyID: UUID
+    PolicyName: str
+    PolicyType: PolicyType
+    PolicyStartDate: date
+    PolicyEndDate: date
+    PremiumAmount: int
+    Status: PolicyStatus
+
+    class Config:
+        orm_mode= True
 class PoliciesResponse(BaseModel):
-    policies: list[Policy]
+    policies: list[PolicyResponse]
