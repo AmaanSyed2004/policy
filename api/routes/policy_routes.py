@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from api.schemas import PolicyInput, PolicyPutInput, PoliciesResponse, PolicyResponse
 from api.database import get_db
 from api.models import PolicyDB
+from api.kafka.producer import produce_event
 router = APIRouter()
 
 
@@ -33,6 +34,8 @@ def add_policy(policy: PolicyInput, db:Session= Depends(get_db)):
     db.add(new_policy)
     db.commit()
     db.refresh(new_policy)
+    policy_data= PoliciesResponse.from_orm(new_policy).dict()
+    produce_event('policy-created', new_policy.dict())
     return {"message": "Policy added successfully", "policy_id": new_policy.PolicyID}
 
 #Update an existing policy

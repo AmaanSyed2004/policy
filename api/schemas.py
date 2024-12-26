@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from api.enums import PolicyStatus
@@ -30,8 +30,8 @@ class PolicyResponse(BaseModel):
     PolicyEndDate: date
     PremiumAmount: int
     Status: PolicyStatus
-
-    class Config:
-        orm_mode= True
+    
+    model_config= ConfigDict(from_attributes=True)
+        
 class PoliciesResponse(BaseModel):
     policies: list[PolicyResponse]
