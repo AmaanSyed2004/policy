@@ -34,8 +34,9 @@ def add_policy(policy: PolicyInput, db:Session= Depends(get_db)):
     db.add(new_policy)
     db.commit()
     db.refresh(new_policy)
-    policy_data= PoliciesResponse.from_orm(new_policy).dict()
-    produce_event('policy-created', new_policy.dict())
+
+    event= new_policy.serialize()
+    produce_event("policy-created", event)
     return {"message": "Policy added successfully", "policy_id": new_policy.PolicyID}
 
 #Update an existing policy
@@ -49,6 +50,9 @@ def change_existing_policy(policy_id: uuid.UUID, policy: PolicyPutInput, db:Sess
         setattr(policy_to_change, key, value)
     db.commit()
     db.refresh(policy_to_change)
+
+    event= policy_to_change.serialize()
+    produce_event("policy-updated", event)
     return {"message": "Policy updated successfully"}
 
 #delete a policy by it's id
@@ -59,4 +63,7 @@ def delete_policy(policy_id: uuid.UUID, db:Session= Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Policy with id {policy_id} not found.")
     db.delete(policy_to_delete)
     db.commit()
+
+    event= policy_to_delete.serialize()
+    produce_event("policy-deleted", event)
     return {"message": "Policy deleted successfully"}
