@@ -15,3 +15,13 @@ class PolicyDB(Base):
     PremiumAmount= Column(Integer, nullable=False)
     Status= Column(Enum(PolicyStatus), nullable=False)
     
+    def serialize(self):
+        return {
+            "PolicyID": str(self.PolicyID),
+            "PolicyHolderName": self.PolicyHolderName,
+            "PolicyType": self.PolicyType.value,
+            "PolicyStartDate": self.PolicyStartDate.isoformat(),
+            "PolicyEndDate": self.PolicyEndDate.isoformat(),
+            "PremiumAmount": self.PremiumAmount,
+            "Status": self.Status.value
+        }

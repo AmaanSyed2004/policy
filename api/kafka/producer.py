@@ -8,6 +8,6 @@ def produce_event(topic, event):
     
     producer = Producer({'bootstrap.servers': kafka_server})
 
-    producer.produce(topic=topic, value=json.dumps(event.model_dump()))
+    producer.produce(topic, json.dumps(event))
     producer.flush()
     print(f"Message sent-> {topic}: {event}")
