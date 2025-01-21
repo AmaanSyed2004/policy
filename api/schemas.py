@@ -3,8 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
-from api.enums import PolicyStatus
-from api.enums import PolicyType
+from api.models.enums import PolicyStatus, PolicyType, UserType
 
 class PolicyInput(BaseModel):
     PolicyHolderName: str
@@ -32,6 +31,18 @@ class PolicyResponse(BaseModel):
     Status: PolicyStatus
     
     model_config= ConfigDict(from_attributes=True)
-        
+
+    
 class PoliciesResponse(BaseModel):
     policies: list[PolicyResponse]
+
+
+class UserRegisterInput(BaseModel):
+    Name: str
+    Email: str
+    Password: str
+    UserType: UserType
+
+class UserLoginInput(BaseModel):
+    Email: str
+    Password: str
