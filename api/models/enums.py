@@ -9,3 +9,7 @@ class PolicyType(str, Enum):
 class PolicyStatus(str, Enum):
     active = "active"
     expired = "expired"
+
+class UserType(str, Enum):
+    admin = "admin"
+    user = "user"
