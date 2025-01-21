@@ -27,7 +27,6 @@ def login(user:UserLoginInput, response: Response, db= Depends(get_db)):
     existingUser= db.query(User).filter(User.Email==user.Email).first()
     if not existingUser:
         raise HTTPException(status_code=400, detail="Email does not exist, please register!")
-    print(f"Stored password hash: {existingUser.Password} (Type: {type(existingUser.Password)})")
 
     if not bcrypt.checkpw(user.Password.encode('utf-8'), existingUser.Password.encode('utf-8')):
         raise HTTPException(status_code=403, detail="Invalid password! Please try again!")
