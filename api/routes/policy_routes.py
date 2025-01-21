@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from api.schemas import PolicyInput, PolicyPutInput, PoliciesResponse, PolicyResponse
 from api.database import get_db
-from api.models import PolicyDB
+from api.models.policies import PolicyDB
 from api.kafka.producer import produce_event
 router = APIRouter()
 
