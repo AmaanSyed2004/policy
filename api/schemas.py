@@ -1,6 +1,7 @@
 from datetime import date
+import re
 from typing import Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from uuid import UUID
 
 from api.models.enums import PolicyStatus, PolicyType, UserType
@@ -39,10 +40,15 @@ class PoliciesResponse(BaseModel):
 
 class UserRegisterInput(BaseModel):
     Name: str
-    Email: str
-    Password: str
+    Email: EmailStr  
+    Password: str  
     UserType: UserType
 
+    @field_validator('Password')
+    def validate_password(cls, v):
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).+$", v):
+            raise ValueError("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.")
+        return v
 class UserLoginInput(BaseModel):
-    Email: str
+    Email: EmailStr
     Password: str
