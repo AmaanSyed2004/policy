@@ -33,17 +33,26 @@ def get_all_policies(db:Session=Depends(get_db), current_user:dict= Depends(auth
 #get a policy by it's id
 
 @router.get("/policies/{policy_id}", response_model=PolicyResponse)
-def get_specific_policy(policy_id:uuid.UUID, db:Session=  Depends(get_db)):
+def get_specific_policy(policy_id:uuid.UUID, db:Session=  Depends(get_db), current_user:dict= Depends(authenticateJWT)):
     policy= db.query(PolicyDB).filter(PolicyDB.PolicyID == policy_id).first()
+    #print policy in a readable format
     if policy is None:
         raise HTTPException(status_code=404, detail=f"Policy with id {policy_id} not found.")
-    return policy
+    if current_user.get('role') == 'admin':
+        return policy
+    else:
+        print(policy.UserID)
+        print(current_user.get('UserID'))
+        if str(policy.UserID) != str(current_user.get('UserID')):
+            raise HTTPException(status_code=403, detail="This policy does not belong to you!")
+        return policy
 
 #post a new policy
 
 @router.post("/policies")
-def add_policy(policy: PolicyInput, db:Session= Depends(get_db)):
+def add_policy(policy: PolicyInput, db:Session= Depends(get_db), current_user:dict= Depends(authenticateJWT)):
     new_policy = PolicyDB(**policy.model_dump())
+    new_policy.UserID= current_user.get('UserID')
     db.add(new_policy)
     db.commit()
     db.refresh(new_policy)
@@ -55,10 +64,13 @@ def add_policy(policy: PolicyInput, db:Session= Depends(get_db)):
 #Update an existing policy
 
 @router.put("/policies/{policy_id}")
-def change_existing_policy(policy_id: uuid.UUID, policy: PolicyPutInput, db:Session= Depends(get_db)):
+def change_existing_policy(policy_id: uuid.UUID, policy: PolicyPutInput, db:Session= Depends(get_db), current_user:dict= Depends(authenticateJWT)):
     policy_to_change = db.query(PolicyDB).filter(PolicyDB.PolicyID == policy_id).first()
     if policy_to_change is None:
         raise HTTPException(status_code=404, detail=f"Policy with id {policy_id} not found.")
+    if current_user.get('role') == 'user' and str(policy_to_change.UserID) != str(current_user.get('UserID')):
+        raise HTTPException(status_code=403, detail="This policy does not belong to you!")
+    
     for key, value in policy.model_dump(exclude_unset=True).items():
         setattr(policy_to_change, key, value)
     db.commit()
@@ -70,13 +82,12 @@ def change_existing_policy(policy_id: uuid.UUID, policy: PolicyPutInput, db:Sess
 
 #delete a policy by it's id
 @router.delete("/policies/{policy_id}")
-def delete_policy(policy_id: uuid.UUID, db:Session= Depends(get_db)):
+def delete_policy(policy_id: uuid.UUID, admin: dict = Depends(authenticateAdmin), db: Session = Depends(get_db)):
     policy_to_delete= db.query(PolicyDB).filter(PolicyDB.PolicyID == policy_id).first()
     if policy_to_delete is None:
         raise HTTPException(status_code=404, detail=f"Policy with id {policy_id} not found.")
     db.delete(policy_to_delete)
     db.commit()
-
     event= policy_to_delete.serialize()
     produce_event("policy-deleted", event)
     return {"message": "Policy deleted successfully"}
