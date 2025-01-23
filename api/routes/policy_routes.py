@@ -6,6 +6,7 @@ from api.schemas import PolicyInput, PolicyPutInput, PoliciesResponse, PolicyRes
 from api.database import get_db
 from api.models.policies import PolicyDB
 from api.kafka.producer import produce_event
+from api.middleware.authMiddleware import authenticateJWT, authenticateAdmin
 router = APIRouter()
 
 
@@ -13,9 +14,21 @@ router = APIRouter()
 # get all policies
 
 @router.get("/policies",  response_model= PoliciesResponse)
-def get_all_policies(db:Session=Depends(get_db))->PoliciesResponse:
-    policies =  db.query(PolicyDB).all()
-    return {"policies":policies}
+def get_all_policies(db:Session=Depends(get_db), current_user:dict= Depends(authenticateJWT))->PoliciesResponse:
+    role = current_user.get('role')
+    UserID = current_user.get('UserID')
+    if not role or not UserID:
+        raise HTTPException(status_code=401, detail="Invalid token") #extra check, even though it should never be reached due to the middleware
+    if role == 'admin':
+        print('role is admin, returning all the policies in the db')
+        policies =  db.query(PolicyDB).all()
+        return {"policies":policies}
+    elif role == 'user':
+        print('role is user, returning all the policies for the user')
+        policies = db.query(PolicyDB).filter(PolicyDB.UserID ==UserID).all()
+        return {"policies":policies}
+    
+    raise HTTPException(status_code=403, detail="You are not authorized to access this route")
 
 #get a policy by it's id
 
