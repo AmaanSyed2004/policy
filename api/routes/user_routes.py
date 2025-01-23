@@ -31,6 +31,6 @@ def login(user:UserLoginInput, response: Response, db= Depends(get_db)):
     if not bcrypt.checkpw(user.Password.encode('utf-8'), existingUser.Password.encode('utf-8')):
         raise HTTPException(status_code=403, detail="Invalid password! Please try again!")
     #user is now verified, send an http only cookie to the client with the jwt
-    token = jwt.encode({"UserID": str(existingUser.UserID)}, os.getenv("JWT_SECRET"), algorithm="HS256")
+    token = jwt.encode({"UserID": str(existingUser.UserID), "role": existingUser.UserType.name}, os.getenv("JWT_SECRET"), algorithm="HS256")
     response.set_cookie(key="access_token", value=token, httponly=True, samesite='strict', secure=True, max_age=3600) 
     return {"message": "User logged in successfully!"}
