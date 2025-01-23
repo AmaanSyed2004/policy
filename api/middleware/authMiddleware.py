@@ -18,7 +18,7 @@ def authenticateJWT(req: Request):
     
 
 def authenticateAdmin(req: Request):
-    token= req.cookies.get('access-token')
+    token= req.cookies.get('access_token')
 
     if not token:
         raise HTTPException(status_code=400, detail="Token Missing!")
